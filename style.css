@@ -333,7 +333,6 @@ body.chats-active .container :where(.app-header, .suggestions) {
   display: none;
 }
 
-.prompt-form .file-upload-wrapper #add-file-btn,
 .prompt-form .file-upload-wrapper.active.img-attached img,
 .prompt-form .file-upload-wrapper.active.file-attached .file-icon,
 .prompt-form .file-upload-wrapper.active:hover #cancel-file-btn {
@@ -460,8 +459,9 @@ body.bot-responding .prompt-form #stop-response-btn {
     opacity: 0;
   }
   
+  /* FIX: Always show theme and delete buttons on mobile */
   .prompt-wrapper.hide-controls :where(#theme-toggle-btn, #delete-chats-btn) {
-    display: none;
+    display: flex !important;
   }
 }
 
