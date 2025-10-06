@@ -12,6 +12,7 @@ const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-
 
 let controller, typingInterval;
 const chatHistory = [];
+const userData = { message: "", file: {} };
 
 // Text-to-Speech variables
 let currentSpeech = null;
@@ -177,10 +178,10 @@ const generateResponse = async (botMsgDiv) => {
     const textElement = botMsgDiv.querySelector(".message-text");
     controller = new AbortController();
     
-    // Add user message to the chat history
+    // Add user message and file data to the chat history
     chatHistory.push({
         role: "user",
-        parts: [{ text: promptInput.value.trim() }]
+        parts: [{ text: userData.message }]
     });
 
     try {
@@ -217,6 +218,8 @@ const generateResponse = async (botMsgDiv) => {
         botMsgDiv.classList.remove("loading");
         document.body.classList.remove("bot-responding");
         scrollToBottom();
+    } finally {
+        userData.file = {};
     }
 };
 
@@ -226,11 +229,19 @@ const handleFormSubmit = (e) => {
     const userMessage = promptInput.value.trim();
     if (!userMessage || document.body.classList.contains("bot-responding")) return;
     
+    userData.message = userMessage;
+    promptInput.value = "";
     document.body.classList.add("chats-active", "bot-responding");
     fileUploadWrapper.classList.remove("file-attached", "img-attached", "active");
     
-    // Generate user message HTML
-    const userMsgHTML = `<p class="message-text">${userMessage}</p>`;
+    // Generate user message HTML with optional file attachment
+    const userMsgHTML = `
+        <p class="message-text">${userData.message}</p>
+        ${userData.file.data ? (userData.file.isImage ? 
+            `<img src="data:${userData.file.mime_type};base64,${userData.file.data}" class="img-attachment" alt="Uploaded image" />` : 
+            `<p class="file-attachment"><span class="material-symbols-rounded">description</span>${userData.file.fileName}</p>`) : ""}
+    `;
+    
     const userMsgDiv = createMessageElement(userMsgHTML, "user-message");
     chatsContainer.appendChild(userMsgDiv);
     scrollToBottom();
@@ -247,7 +258,6 @@ const handleFormSubmit = (e) => {
     
     // Save to history
     setTimeout(saveChatHistory, 100);
-    promptInput.value = "";
 };
 
 // Handle file input change (file upload)
@@ -269,6 +279,14 @@ fileInput.addEventListener("change", () => {
         }
         
         fileUploadWrapper.classList.add("active", isImage ? "img-attached" : "file-attached");
+        
+        // Store file data in userData obj
+        userData.file = { 
+            fileName: file.name, 
+            data: base64String, 
+            mime_type: file.type, 
+            isImage 
+        };
     };
     
     reader.onerror = () => {
@@ -278,12 +296,14 @@ fileInput.addEventListener("change", () => {
 
 // Cancel file upload
 document.querySelector("#cancel-file-btn").addEventListener("click", () => {
+    userData.file = {};
     fileUploadWrapper.classList.remove("file-attached", "img-attached", "active");
 });
 
 // Stop Bot Response
 document.querySelector("#stop-response-btn").addEventListener("click", () => {
     controller?.abort();
+    userData.file = {};
     clearInterval(typingInterval);
     
     const loadingMessage = chatsContainer.querySelector(".bot-message.loading");
