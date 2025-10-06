@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PHI Ai Bot Assistant VR1</title>
+    
+    <!-- FAVICON ඇතුළත් කිරීම -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <!-- Linking Google Fonts For Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@32,400,0,0" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- App Header -->
+      <header class="app-header">
+        <img src="logo.png" alt="PHI AI Logo" width="150" height="150">
+        <h1 class="heading">Hello, I am PHI Ai Bot Assistant VR1</h1>
+        <h4 class="sub-heading">ආයුබෝවන් ! How can I help you today?</h4>
+      </header>
+      
+      <!-- Suggestions List -->
+      <ul class="suggestions">
+        <li class="suggestions-item">
+          <p class="text">මහජන සෞඛ්‍ය පරීක්ෂකවරයාගෙන් ඉටු කල හැකි රාජකාරි මොනවද?</p>
+          <span class="icon material-symbols-rounded">draw</span>
+        </li>
+        <li class="suggestions-item">
+          <p class="text">මම ව්‍යාපාරයක් ලියාපදිංචි කර ගන්නෙ කෙසේද?</p>
+          <span class="icon material-symbols-rounded">lightbulb</span>
+        </li>
+        <li class="suggestions-item">
+          <p class="text">ශ්‍රී ලංකාවේ ආහාර සම්භන්ධයෙන් පවතින නීති සහ රෙගුලාසි මොනවද? </p>
+          <span class="icon material-symbols-rounded">explore</span>
+        </li>
+        <li class="suggestions-item">
+          <p class="text">නිවසෙන් බැහැරලන අපජලය සහ ඝන අපද්‍රව්‍ය කළමණාකරනය කරගන්නා ක්‍රම මොනවද?</p>
+          <span class="icon material-symbols-rounded">code_blocks</span>
+        </li>
+      </ul>
+      
+      <!-- Chats Container -->
+      <div class="chats-container"></div> 
+      
+      <!-- Prompt Input --> 
+      <div class="prompt-container">
+        <div class="prompt-wrapper">
+          <form action="#" class="prompt-form">
+            <input type="text" placeholder="Ask me anything..." class="prompt-input" required />
+            <div class="prompt-actions">
+              <!-- File Upload Wrapper -->
+              <div class="file-upload-wrapper">
+                <img src="#" class="file-preview" alt="File preview"/>
+                <input id="file-input" type="file" accept="image/*, .pdf, .txt, .csv" hidden />
+                <button type="button" class="file-icon material-symbols-rounded">description</button>
+                <button id="cancel-file-btn" type="button" class="material-symbols-rounded">close</button>
+                <button id="add-file-btn" type="button" class="material-symbols-rounded">attach_file</button>
+              </div>
+              <!-- Send Prompt and Stop Response Buttons -->
+              <button id="stop-response-btn" type="button" class="material-symbols-rounded">stop_circle</button>
+              <button id="send-prompt-btn" class="material-symbols-rounded">arrow_upward</button>
+            </div>
+          </form>
+          <!-- Theme and Delete Chats Buttons -->
+          <button id="theme-toggle-btn" class="material-symbols-rounded">light_mode</button>
+          <button id="delete-chats-btn" class="material-symbols-rounded">delete</button>
+        </div>
+        <p class="disclaimer-text">Design by : Nipuna. | PHI Ai bot 2025 VR1</p>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
