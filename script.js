@@ -12,11 +12,9 @@ const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-
 
 let controller, typingInterval;
 const chatHistory = [];
-const userData = { message: "", file: {} };
 
 // Text-to-Speech variables
 let currentSpeech = null;
-const bookmarkedMessages = new Set();
 
 // Set initial theme from local storage
 const isLightTheme = localStorage.getItem("themeColor") === "light_mode";
@@ -116,105 +114,11 @@ const addTTSButton = (botMsgDiv) => {
     botMsgDiv.appendChild(ttsBtn);
 };
 
-// Search and Bookmark functionality
-const initializeSearchAndBookmark = () => {
-    // Create search container
-    const searchContainer = document.createElement('div');
-    searchContainer.className = 'search-container';
-    searchContainer.innerHTML = `
-        <div class="search-box">
-            <input type="text" class="search-input" placeholder="Search messages...">
-            <button class="bookmark-btn material-symbols-rounded" title="Show bookmarks">bookmark</button>
-        </div>
-    `;
-    document.body.appendChild(searchContainer);
-
-    const searchInput = searchContainer.querySelector('.search-input');
-    const bookmarkBtn = searchContainer.querySelector('.bookmark-btn');
-
-    // Search functionality
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        highlightSearchResults(searchTerm);
-    });
-
-    // Bookmark functionality
-    bookmarkBtn.addEventListener('click', () => {
-        if (bookmarkBtn.classList.contains('active')) {
-            showAllMessages();
-            bookmarkBtn.classList.remove('active');
-        } else {
-            showBookmarkedMessages();
-            bookmarkBtn.classList.add('active');
-        }
-    });
-
-    // Add bookmark capability to messages
-    chatsContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('message-text') && e.altKey) {
-            e.preventDefault();
-            const messageDiv = e.target.closest('.message');
-            toggleBookmark(messageDiv);
-        }
-    });
-};
-
-const toggleBookmark = (messageDiv) => {
-    const isBookmarked = bookmarkedMessages.has(messageDiv);
-    
-    if (isBookmarked) {
-        bookmarkedMessages.delete(messageDiv);
-        messageDiv.classList.remove('bookmarked');
-    } else {
-        bookmarkedMessages.add(messageDiv);
-        messageDiv.classList.add('bookmarked');
-    }
-    saveChatHistory();
-};
-
-const highlightSearchResults = (searchTerm) => {
-    const messages = chatsContainer.querySelectorAll('.message-text');
-    
-    messages.forEach(message => {
-        const text = message.textContent;
-        message.innerHTML = text;
-        
-        if (searchTerm.trim() !== '') {
-            const regex = new RegExp(`(${searchTerm})`, 'gi');
-            message.innerHTML = text.replace(regex, '<span class="highlight">$1</span>');
-        }
-    });
-};
-
-const showBookmarkedMessages = () => {
-    const allMessages = chatsContainer.querySelectorAll('.message');
-    
-    allMessages.forEach(message => {
-        if (bookmarkedMessages.has(message)) {
-            message.style.display = 'flex';
-        } else {
-            message.style.display = 'none';
-        }
-    });
-};
-
-const showAllMessages = () => {
-    const allMessages = chatsContainer.querySelectorAll('.message');
-    allMessages.forEach(message => {
-        message.style.display = 'flex';
-    });
-};
-
 // Chat history persistence
 const saveChatHistory = () => {
-    const bookmarkedIds = Array.from(bookmarkedMessages).map(msg => {
-        return Array.from(chatsContainer.children).indexOf(msg);
-    });
-    
     const chatData = {
         history: chatHistory,
         messages: chatsContainer.innerHTML,
-        bookmarked: bookmarkedIds,
         timestamp: new Date().toISOString()
     };
     localStorage.setItem('phiChatHistory', JSON.stringify(chatData));
@@ -235,16 +139,6 @@ const loadChatHistory = () => {
                     addTTSButton(botMsg);
                 }
             });
-            
-            // Restore bookmarks
-            if (chatData.bookmarked) {
-                chatData.bookmarked.forEach(index => {
-                    if (chatsContainer.children[index]) {
-                        bookmarkedMessages.add(chatsContainer.children[index]);
-                        chatsContainer.children[index].classList.add('bookmarked');
-                    }
-                });
-            }
             
             if (chatsContainer.children.length > 0) {
                 document.body.classList.add('chats-active');
@@ -283,10 +177,10 @@ const generateResponse = async (botMsgDiv) => {
     const textElement = botMsgDiv.querySelector(".message-text");
     controller = new AbortController();
     
-    // Add user message and file data to the chat history
+    // Add user message to the chat history
     chatHistory.push({
         role: "user",
-        parts: [{ text: userData.message }]
+        parts: [{ text: promptInput.value.trim() }]
     });
 
     try {
@@ -323,8 +217,6 @@ const generateResponse = async (botMsgDiv) => {
         botMsgDiv.classList.remove("loading");
         document.body.classList.remove("bot-responding");
         scrollToBottom();
-    } finally {
-        userData.file = {};
     }
 };
 
@@ -334,19 +226,11 @@ const handleFormSubmit = (e) => {
     const userMessage = promptInput.value.trim();
     if (!userMessage || document.body.classList.contains("bot-responding")) return;
     
-    userData.message = userMessage;
-    promptInput.value = "";
     document.body.classList.add("chats-active", "bot-responding");
     fileUploadWrapper.classList.remove("file-attached", "img-attached", "active");
     
-    // Generate user message HTML with optional file attachment
-    const userMsgHTML = `
-        <p class="message-text">${userData.message}</p>
-        ${userData.file.data ? (userData.file.isImage ? 
-            `<img src="data:${userData.file.mime_type};base64,${userData.file.data}" class="img-attachment" alt="Uploaded image" />` : 
-            `<p class="file-attachment"><span class="material-symbols-rounded">description</span>${userData.file.fileName}</p>`) : ""}
-    `;
-    
+    // Generate user message HTML
+    const userMsgHTML = `<p class="message-text">${userMessage}</p>`;
     const userMsgDiv = createMessageElement(userMsgHTML, "user-message");
     chatsContainer.appendChild(userMsgDiv);
     scrollToBottom();
@@ -363,6 +247,7 @@ const handleFormSubmit = (e) => {
     
     // Save to history
     setTimeout(saveChatHistory, 100);
+    promptInput.value = "";
 };
 
 // Handle file input change (file upload)
@@ -384,14 +269,6 @@ fileInput.addEventListener("change", () => {
         }
         
         fileUploadWrapper.classList.add("active", isImage ? "img-attached" : "file-attached");
-        
-        // Store file data in userData obj
-        userData.file = { 
-            fileName: file.name, 
-            data: base64String, 
-            mime_type: file.type, 
-            isImage 
-        };
     };
     
     reader.onerror = () => {
@@ -401,14 +278,12 @@ fileInput.addEventListener("change", () => {
 
 // Cancel file upload
 document.querySelector("#cancel-file-btn").addEventListener("click", () => {
-    userData.file = {};
     fileUploadWrapper.classList.remove("file-attached", "img-attached", "active");
 });
 
 // Stop Bot Response
 document.querySelector("#stop-response-btn").addEventListener("click", () => {
     controller?.abort();
-    userData.file = {};
     clearInterval(typingInterval);
     
     const loadingMessage = chatsContainer.querySelector(".bot-message.loading");
@@ -437,7 +312,6 @@ document.querySelector("#delete-chats-btn").addEventListener("click", () => {
             chatsContainer.innerHTML = "";
             document.body.classList.remove("chats-active", "bot-responding");
             clearChatHistory();
-            bookmarkedMessages.clear();
         }
     }
 });
@@ -476,6 +350,3 @@ console.log("PHI AI Bot Assistant VR1 initialized successfully!");
 
 // Load saved chat history
 loadChatHistory();
-
-// Initialize search and bookmark functionality
-initializeSearchAndBookmark();
