@@ -405,62 +405,6 @@ body.bot-responding .prompt-form #stop-response-btn {
   opacity: 1;
 }
 
-/* Search and Bookmark styles */
-.search-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-}
-
-.search-box {
-  display: flex;
-  align-items: center;
-  background: var(--secondary-color);
-  border-radius: 25px;
-  padding: 8px 15px;
-  gap: 8px;
-}
-
-.search-input {
-  background: none;
-  border: none;
-  color: var(--text-color);
-  outline: none;
-  width: 150px;
-}
-
-.search-input::placeholder {
-  color: var(--placeholder-color);
-}
-
-.bookmark-btn {
-  background: none;
-  border: none;
-  color: var(--text-color);
-  cursor: pointer;
-  border-radius: 50%;
-  padding: 5px;
-}
-
-.bookmark-btn.active {
-  color: #ffc107;
-}
-
-.bookmark-btn:hover {
-  background: var(--secondary-hover-color);
-}
-
-.highlight {
-  background: yellow;
-  color: black;
-}
-
-.bookmarked {
-  border-left: 3px solid #ffc107;
-  padding-left: 10px;
-}
-
 /* Responsive media query code for small screens */
 @media (max-width: 768px) {
   .container {
@@ -519,15 +463,6 @@ body.bot-responding .prompt-form #stop-response-btn {
   .prompt-wrapper.hide-controls :where(#theme-toggle-btn, #delete-chats-btn) {
     display: none;
   }
-  
-  .search-container {
-    top: 10px;
-    right: 10px;
-  }
-  
-  .search-input {
-    width: 120px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -560,18 +495,5 @@ body.bot-responding .prompt-form #stop-response-btn {
   
   .chats-container .user-message .img-attachment {
     width: 85%;
-  }
-  
-  .search-container {
-    position: relative;
-    top: 0;
-    right: 0;
-    margin: 10px auto;
-    width: calc(100% - 40px);
-    max-width: 990px;
-  }
-  
-  .search-box {
-    justify-content: center;
   }
 }
