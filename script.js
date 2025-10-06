@@ -324,16 +324,47 @@ themeToggleBtn.addEventListener("click", () => {
     themeToggleBtn.textContent = isLightTheme ? "dark_mode" : "light_mode";
 });
 
-// Delete all chats
-document.querySelector("#delete-chats-btn").addEventListener("click", () => {
+// Delete all chats - FIXED VERSION
+const deleteChatsBtn = document.querySelector("#delete-chats-btn");
+
+function handleDeleteChats() {
     if (chatsContainer.children.length > 0) {
         if (confirm("Are you sure you want to delete all chats?")) {
+            // Clear everything
             chatHistory.length = 0;
             chatsContainer.innerHTML = "";
             document.body.classList.remove("chats-active", "bot-responding");
             clearChatHistory();
+            
+            // Show confirmation
+            const tempMsg = document.createElement('div');
+            tempMsg.textContent = 'All chats deleted!';
+            tempMsg.className = 'copy-feedback';
+            document.body.appendChild(tempMsg);
+            setTimeout(() => tempMsg.remove(), 2000);
+            
+            // Optional: Reload after short delay to ensure clean state
+            setTimeout(() => {
+                location.reload();
+            }, 500);
         }
+    } else {
+        // Show message if no chats
+        const tempMsg = document.createElement('div');
+        tempMsg.textContent = 'No chats to delete!';
+        tempMsg.className = 'copy-feedback';
+        document.body.appendChild(tempMsg);
+        setTimeout(() => tempMsg.remove(), 2000);
     }
+}
+
+// Add event listeners for delete button
+deleteChatsBtn.addEventListener("click", handleDeleteChats);
+
+// Also add touch event for mobile devices
+deleteChatsBtn.addEventListener("touchend", function(e) {
+    e.preventDefault();
+    handleDeleteChats();
 });
 
 // Handle suggestions click
@@ -350,7 +381,11 @@ document.addEventListener("click", ({ target }) => {
     const shouldHide = target.classList.contains("prompt-input") || 
                       (wrapper.classList.contains("hide-controls") && 
                        (target.id === "add-file-btn" || target.id === "stop-response-btn"));
-    wrapper.classList.toggle("hide-controls", shouldHide);
+    
+    // Always show theme and delete buttons, never hide them
+    if (!target.id.includes("theme-toggle-btn") && !target.id.includes("delete-chats-btn")) {
+        wrapper.classList.toggle("hide-controls", shouldHide);
+    }
 });
 
 // Add event listeners for form submission and file input click
